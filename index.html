@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizlet | Learning tools & flashcards</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "hurme_no2-webfont", -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        :root {
+            --quizlet-purple: #4255FF;
+            --quizlet-text: #1a1d28;
+            --background-primary: #ffffff;
+            --background-secondary: #f6f7fb;
+            --border-color: #edeff4;
+            --text-primary: #1a1d28;
+            --text-secondary: #939bb4;
+            --card-background: #ffffff;
+            --footer-background: #ffffff;
+            --modal-backdrop: rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] {
+            --quizlet-purple: #5667FF;
+            --quizlet-text: #ffffff;
+            --background-primary: #2e3a61;
+            --background-secondary: #2e3856;
+            --border-color: #3d4766;
+            --text-primary: #ffffff;
+            --text-secondary: #c3c9dd;
+            --card-background: #2e3856;
+            --footer-background: #1a1d28;
+            --modal-backdrop: #2E3856;
+        }
+
+        body {
+            background-color: var(--background-primary);
+            color: var(--text-primary);
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--background-primary);
+        }
+
+        .logo {
+            color: var(--quizlet-purple);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            margin-right: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-dropdown {
+            position: relative;
+            cursor: pointer;
+            color: var(--quizlet-text);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-dropdown::after {
+            content: '▼';
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--background-primary);
+            border: 1px solid var(--border-color);
+            min-width: 200px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            z-index: 1000;
+        }
+
+        .nav-dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--background-secondary);
+        }
+
+        .dropdown-item i {
+            font-size: 1.2em;
+            color: var(--quizlet-purple);
+        }
+
+        .search-bar {
+            flex: 1;
+            margin: 0 2rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--background-secondary);
+            color: var(--text-primary);
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .ai-nav-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--quizlet-purple), #5667FF);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(66, 85, 255, 0.25);
+        }
+
+        .ai-nav-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 85, 255, 0.35);
+            background: linear-gradient(135deg, #3244cc, #4255FF);
+        }
+
+        .ai-nav-button i {
+            font-size: 1.2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+        }
+
+        .btn-create {
+            background: none;
+            color: var(--quizlet-text);
+        }
+
+        .btn-create:hover {
+            background-color: var(--background-secondary);
+        }
+
+        .btn-login {
+            background: var(--quizlet-purple);
+            color: white;
+        }
+
+        .btn-login:hover {
+            background-color: #3244cc;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background-color: var(--background-secondary);
+            min-height: calc(100vh - 72px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 2rem;
+        }
+
+        .cards-slider {
+            position: relative;
+            width: 100%;
+            max-width: 1320px;
+            margin: 2rem auto;
+            overflow: hidden;
+        }
+
+        .cards-container {
+            display: flex;
+            gap: 20px;
+            transition: transform 0.3s ease;
+            padding: 1rem;
+        }
+
+        .study-card {
+            flex: 0 0 314px;
+            height: 387px;
+            background: var(--card-background);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .study-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .study-card h3 {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .study-card img {
+            width: 180px;
+            height: 180px;
+            margin-bottom: 1.5rem;
+        }
+
+        .study-card p {
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .slider-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: var(--background-primary);
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--quizlet-purple);
+        }
+
+        .slider-button:hover {
+            background: var(--background-secondary);
+        }
+
+        .slider-button.prev {
+            left: 10px;
+        }
+
+        .slider-button.next {
+            right: 10px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 800px;
+        }
+
+        .btn-signup {
+            background: var(--quizlet-purple);
+            color: white;
+            font-size: 1.125rem;
+            padding: 1rem 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-signup:hover {
+            background-color: #3244cc;
+        }
+
+        .teacher-link {
+            color: var(--quizlet-purple);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .teacher-link:hover {
+            text-decoration: underline;
+        }
+
+        .app-showcase {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4rem 2rem;
+            background: var(--background-primary);
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            gap: 3rem;
+            overflow-x: hidden;
+            border-radius: 15px;
+        }
+        .feature-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            box-sizing: border-box;
+            gap: 4rem;
+        }
+            
+
+        .feature-content {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .feature-content h2 {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .feature-content p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .feature-image {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .feature-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .feature-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--quizlet-purple);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .feature-button:hover {
+            background-color: #3244cc;
+        }
+
+        .feature-link {
+            display: inline-block;
+            color: var(--quizlet-purple);
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .feature-link:hover {
+            text-decoration: underline;
+        }
+
+        .app-showcase-content {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .app-showcase-content h2 {
+            font-size: 3.5rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .app-showcase-content p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .app-store-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .app-store-button {
+            width: 180px;
+            height: 60px;
+            transition: transform 0.2s ease;
+        }
+
+        .app-store-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .app-showcase-image {
+            flex: 1;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .app-showcase-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .popular-sets-section {
+            padding: 4rem 2rem;
+            background: var(--background-primary);
+            margin: 10px 0px;
+            border-radius: 10px;
+        }
+
+        .section-header {
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .sets-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sets-nav-button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: var(--background-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .sets-nav-button:hover:not([disabled]) {
+            background: var(--border-color);
+        }
+
+        .sets-nav-button[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .sets-page-indicator {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .sets-grid-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .sets-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .study-set-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .study-set-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .set-preview {
+            height: 160px;
+            background: var(--background-secondary);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-card {
+            width: 80%;
+            height: 120px;
+            background: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            color: var(--text-primary);
+            position: absolute;
+            transition: transform 0.3s ease;
+        }
+
+        .preview-card.back {
+            transform: translateX(4px) translateY(4px);
+            background: var(--border-color);
+            z-index: -1;
+        }
+
+        .set-info {
+            padding: 1.5rem;
+        }
+
+        .set-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .set-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .subject-tag {
+            color: var(--quizlet-purple);
+            background: #f0f1ff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+        }
+
+        .creator-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .creator-info img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        .site-footer {
+            background-color: var(--footer-background);
+            color: var(--text-primary);
+            padding: 4rem 2rem 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3 {
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--text-secondary);
+        }
+
+        .language-selector {
+            background: transparent;
+            border: 1px solid var(--text-secondary);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 200px;
+            font-size: 0.875rem;
+        }
+
+        .language-selector option {
+            background: var(--background-secondary);
+            color: var(--text-primary);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .social-link {
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            transition: color 0.2s;
+        }
+
+        .social-link:hover {
+            color: var(--text-primary);
+        }
+
+        .copyright {
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .social-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Dark mode toggle button */
+        .dark-mode-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            margin-right: 1rem;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+        }
+
+        .dark-mode-toggle:hover {
+            color: var(--quizlet-purple);
+        }
+
+        /* AI Features Styles */
+        .ai-features {
+            padding: 4rem 2rem;
+            background: var(--background-primary);
+        }
+
+        .ai-feature-card {
+            background: var(--card-background);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .ai-feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .ai-feature-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--quizlet-purple);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .ai-content {
+            flex: 1;
+        }
+
+        .ai-suggestions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .suggestion-chip {
+            background: var(--background-secondary);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .suggestion-chip:hover {
+            background: var(--quizlet-purple);
+            color: white;
+            border-color: var(--quizlet-purple);
+        }
+
+        .diagram-preview {
+            width: 100%;
+            height: 200px;
+            background: var(--background-secondary);
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--border-color);
+        }
+
+        .diagram-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .ai-button {
+            background: var(--quizlet-purple);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .ai-button:hover {
+            background: #3244cc;
+        }
+
+        .ai-button.secondary {
+            background: var(--background-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .ai-button.secondary:hover {
+            background: var(--border-color);
+        }
+
+        /* Enhanced AI Modal */
+        .ai-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-backdrop);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .ai-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .ai-modal-content {
+            background: var(--background-primary);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px) scale(0.95);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-modal.active .ai-modal-content {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        /* AI Chat Icon and Interface Styles */
+        .ai-chat-icon {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--quizlet-purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(66, 85, 255, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 1000;
+        }
+
+        .ai-chat-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(66, 85, 255, 0.35);
+        }
+
+        .ai-chat-icon i {
+            color: white;
+            font-size: 24px;
+        }
+
+        .chat-interface {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            height: 500px;
+            background: var(--background-primary);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+            border: 1px solid var(--border-color);
+        }
+
+        .chat-interface.active {
+            display: flex;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header h3 {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .message.ai {
+            background: var(--background-secondary);
+            color: var(--text-primary);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user {
+            background: var(--quizlet-purple);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--background-secondary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .chat-input button {
+            background: var(--quizlet-purple);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-input button:hover {
+            background: #3244cc;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .cards-slider {
+                max-width: 1000px;
+            }
+
+            .feature-section {
+                padding: 3rem 1.5rem;
+                gap: 2rem;
+            }
+
+            .sets-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .feature-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .feature-content {
+                order: 1;
+            }
+
+            .feature-image {
+                order: 2;
+                margin-top: 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .search-bar {
+                margin: 0 1rem;
+            }
+
+            .cards-slider {
+                max-width: 700px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+                flex-wrap: wrap;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+                margin-top: 1rem;
+                gap: 0.5rem;
+            }
+
+            .search-bar {
+                order: 3;
+                width: 100%;
+                margin: 1rem 0;
+            }
+
+            .hero {
+                padding: 2rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .cards-slider {
+                max-width: 100%;
+                padding: 0 1rem;
+            }
+
+            .study-card {
+                flex: 0 0 280px;
+                height: 350px;
+            }
+
+            .sets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-interface {
+                width: 90%;
+                right: 5%;
+                left: 5%;
+                bottom: 80px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .ai-nav-button {
+                padding: 0.5rem 1rem;
+            }
+
+            .feature-content h2 {
+                font-size: 2rem;
+            }
+
+            .app-showcase-content h2 {
+                font-size: 2.5rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-section {
+                margin-bottom: 2rem;
+            }
+
+            .language-selector {
+                margin: 0 auto;
+            }
+
+            .ai-chat-icon {
+                width: 50px;
+                height: 50px;
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .chat-interface {
+                height: 80vh;
+            }
+        }
+
+        /* Mobile Navigation Menu */
+        .mobile-menu-button {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 992px) {
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .nav-links.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--background-primary);
+                padding: 1rem;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+            }
+
+            .nav-dropdown {
+                width: 100%;
+                padding: 0.5rem 0;
+            }
+
+            .dropdown-content {
+                position: static;
+                display: none;
+                box-shadow: none;
+                border: none;
+                padding: 0.5rem 0 0.5rem 1rem;
+            }
+
+            .nav-dropdown.active .dropdown-content {
+                display: block;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) {
+            .study-card:hover {
+                transform: none;
+            }
+
+            .ai-chat-icon:active {
+                transform: scale(0.95);
+            }
+
+            .suggestion-chip:active {
+                background: var(--quizlet-purple);
+                color: white;
+            }
+        }
+
+        /* Improved Loading States */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* Print Styles */
+        @media print {
+            .navbar, .footer, .ai-chat-icon, .chat-interface {
+                display: none;
+            }
+
+            .hero {
+                padding: 0;
+            }
+
+            .study-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Enhanced Mobile Navigation */
+        @media (max-width: 992px) {
+            .mobile-menu-button {
+                order: 1;
+                margin-right: 1rem;
+            }
+
+            .logo {
+                order: 2;
+                margin-right: auto;
+            }
+
+            .nav-buttons {
+                order: 3;
+                margin-left: auto;
+            }
+
+            .nav-links.active {
+                position: fixed;
+                top: 72px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--background-primary);
+                z-index: 1000;
+                overflow-y: auto;
+                padding: 1rem;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .nav-dropdown {
+                padding: 1rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .nav-dropdown:last-child {
+                border-bottom: none;
+            }
+
+            .dropdown-content {
+                margin-top: 1rem;
+                border-left: 2px solid var(--quizlet-purple);
+            }
+        }
+
+        /* Enhanced Card Layouts for Mobile */
+        @media (max-width: 768px) {
+            .cards-container {
+                padding: 0;
+                gap: 15px;
+            }
+
+            .study-card {
+                flex: 0 0 calc(100% - 30px);
+                height: auto;
+                min-height: 300px;
+                margin: 0 15px;
+            }
+
+            .study-card img {
+                width: 140px;
+                height: 140px;
+                margin-bottom: 1rem;
+            }
+
+            .study-card h3 {
+                font-size: 1.25rem;
+            }
+
+            .study-card p {
+                font-size: 0.9rem;
+            }
+
+            .slider-button {
+                width: 36px;
+                height: 36px;
+                background: var(--quizlet-purple);
+                color: white;
+            }
+
+            .slider-button.prev {
+                left: 5px;
+            }
+
+            .slider-button.next {
+                right: 5px;
+            }
+
+            /* Feature Sections */
+            .feature-section {
+                padding: 2rem 1rem;
+                gap: 2rem;
+            }
+
+            .feature-content {
+                padding: 1rem;
+            }
+
+            .feature-content h2 {
+                font-size: 1.75rem;
+            }
+
+            .feature-content p {
+                font-size: 1rem;
+            }
+
+            /* Study Set Cards */
+            .study-set-card {
+                margin-bottom: 1rem;
+            }
+
+            .set-preview {
+                height: 120px;
+            }
+
+            .preview-card {
+                height: 90px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Touch-Optimized Interactions */
+        @media (hover: none) and (pointer: coarse) {
+            .nav-dropdown, 
+            .study-card,
+            .feature-button,
+            .ai-button,
+            .slider-button {
+                cursor: default;
+            }
+
+            .nav-dropdown:active,
+            .study-card:active,
+            .feature-button:active,
+            .ai-button:active {
+                transform: scale(0.98);
+            }
+
+            .slider-button:active {
+                opacity: 0.8;
+            }
+
+            .cards-container {
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .chat-interface {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Smooth Scrolling for iOS */
+        @supports (-webkit-touch-callout: none) {
+            .chat-messages,
+            .cards-container,
+            .sets-grid-container {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <button class="mobile-menu-button" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a href="#" class="logo">Quizlet</a>
+        <div class="nav-links">
+            <div class="nav-dropdown">
+                Study tools
+                <div class="dropdown-content">
+                    <a href="#" class="dropdown-item"><i>📚</i>Flashcards</a>
+                    <a href="#" class="dropdown-item"><i>📖</i>Learn</a>
+                    <a href="#" class="dropdown-item"><i>📝</i>Study Guides</a>
+                    <a href="#" class="dropdown-item"><i>✍️</i>Test</a>
+                    <a href="#" class="dropdown-item"><i>🎓</i>Expert Solutions</a>
+                </div>
+            </div>
+            <div class="nav-dropdown">
+                Subjects
+                <div class="dropdown-content">
+                    <a href="#" class="dropdown-item"><i>📋</i>Exams</a>
+                    <a href="#" class="dropdown-item"><i>📚</i>Literature</a>
+                    <a href="#" class="dropdown-item"><i>🎨</i>Arts and Humanities</a>
+                    <a href="#" class="dropdown-item"><i>🌍</i>Languages</a>
+                    <a href="#" class="dropdown-item"><i>🔢</i>Math</a>
+                    <a href="#" class="dropdown-item"><i>🔬</i>Science</a>
+                    <a href="#" class="dropdown-item"><i>🌐</i>Social Science</a>
+                </div>
+            </div>
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Become an expert in whatever you're learning">
+        </div>
+        <div class="nav-buttons">
+            <button class="ai-nav-button" id="aiButton">
+                <i class="fas fa-robot"></i>
+                AI Features
+            </button>
+            <button class="dark-mode-toggle" aria-label="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="btn btn-create">Create</button>
+            <button class="btn btn-login">Log in</button>
+        </div>
+    </nav>
+
+    <main class="hero">
+       
+        
+        <h1>How do you want to study?</h1>
+        <p>Master whatever you're learning with Quizlet's interactive flashcards, practice tests, and study activities.</p>
+        
+        
+
+        <button class="btn btn-signup">Sign up for free</button>
+        <br>
+        <a href="#" class="teacher-link">I'm a teacher</a>
+
+        <div class="cards-slider">
+            <button class="slider-button prev"><i class="fas fa-chevron-left"></i></button>
+            <div class="cards-container">
+                <div class="study-card">
+                    <h3>Learn</h3>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%234255FF' rx='20'/%3E%3Cpath d='M50 100 L150 100 M100 50 L100 150' stroke='white' stroke-width='10'/%3E%3C/svg%3E" alt="Learn icon">
+                    <p>Master concepts step by step with our adaptive learning mode</p>
+                </div>
+                <div class="study-card">
+                    <h3>Study Guides</h3>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23FF725C' rx='20'/%3E%3Cpath d='M50 70 L150 70 M50 100 L150 100 M50 130 L150 130' stroke='white' stroke-width='10'/%3E%3C/svg%3E" alt="Study Guides icon">
+                    <p>Comprehensive study materials created by top students</p>
+                </div>
+                <div class="study-card">
+                    <h3>Flashcards</h3>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%2300C985' rx='20'/%3E%3Cpath d='M60 60 L140 60 L140 140 L60 140 Z' stroke='white' stroke-width='10' fill='none'/%3E%3C/svg%3E" alt="Flashcards icon">
+                    <p>Review concepts quickly with interactive flashcards</p>
+                </div>
+                <div class="study-card">
+                    <h3>Practice Tests</h3>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23FFB800' rx='20'/%3E%3Cpath d='M60 100 L90 130 L140 70' stroke='white' stroke-width='10' fill='none'/%3E%3C/svg%3E" alt="Practice Tests icon">
+                    <p>Test your knowledge with practice exams</p>
+                </div>
+                <div class="study-card">
+                    <h3>Expert Solutions</h3>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%239B51E0' rx='20'/%3E%3Cpath d='M60 100 L100 140 L140 60' stroke='white' stroke-width='10' fill='none'/%3E%3C/svg%3E" alt="Expert Solutions icon">
+                    <p>Get step-by-step explanations from subject matter experts</p>
+                </div>
+                <div class="study-card">
+                    <h3>AI Tutor</h3>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%2300B3E3' rx='20'/%3E%3Ccircle cx='100' cy='100' r='40' stroke='white' stroke-width='10' fill='none'/%3E%3C/svg%3E" alt="AI Tutor icon">
+                    <p>Get personalized help with our AI-powered tutoring system</p>
+                </div>
+            </div>
+            <button class="slider-button next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        
+
+        <div class="app-showcase">
+            <div class="feature-section">
+                <div class="feature-content">
+                    <h2>Make class material instantly studiable</h2>
+                    <p>Turn your slides, videos, and notes into flashcard sets, practice tests, and study guides.</p>
+                    <a href="#" class="feature-button">Try it out</a>
+                </div>
+                <div class="feature-image">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23F8F8FF' rx='12'/%3E%3Crect x='50' y='50' width='500' height='300' fill='white' stroke='%234255FF' stroke-width='2' rx='8'/%3E%3Ctext x='100' y='100' font-family='Arial' font-size='24' fill='%231a1d28'%3EStudy Guide%3C/text%3E%3Crect x='100' y='150' width='400' height='150' fill='%23F6F7FB' rx='4'/%3E%3C/svg%3E" alt="Study Material Conversion">
+                </div>
+            </div>
+
+            <div class="feature-section">
+                <div class="feature-image">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23E6F3FF' rx='12'/%3E%3Crect x='100' y='100' width='400' height='200' fill='white' stroke='%234255FF' stroke-width='2' rx='8'/%3E%3Ctext x='150' y='150' font-family='Arial' font-size='24' fill='%231a1d28'%3ETest Prep%3C/text%3E%3Crect x='150' y='180' width='300' height='80' fill='%23F6F7FB' rx='4'/%3E%3C/svg%3E" alt="Test Preparation Interface">
+                </div>
+                <div class="feature-content">
+                    <h2>Test prep for any subject</h2>
+                    <p>Memorize anything with personalized practice tests and study sessions in Learn. 98% of students say Quizlet has improved their understanding.</p>
+                    <a href="#" class="feature-button">Get started</a>
+                </div>
+            </div>
+
+            <div class="feature-section" style="background-color: #DBDFFF; padding: 2rem; border-radius: 12px;">
+                <div class="feature-content">
+                    <h2>Empower your students</h2>
+                    <p>Help every student confidently learn anything. With free flashcard sets, study modes, and in-class games like Quizlet Live, you can instantly create a more engaged classroom.</p>
+                    <a href="#" class="feature-button">Sign up as a teacher</a>
+                    <br>
+                    <a href="#" class="feature-link">See how teachers use Quizlet</a>
+                </div>
+                <div class="feature-image">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23F0F0FF' rx='12'/%3E%3Crect x='50' y='50' width='500' height='300' fill='white' stroke='%234255FF' stroke-width='2' rx='8'/%3E%3Ctext x='100' y='100' font-family='Arial' font-size='24' fill='%231a1d28'%3ETeacher Dashboard%3C/text%3E%3Crect x='100' y='150' width='400' height='150' fill='%23F6F7FB' rx='4'/%3E%3C/svg%3E" alt="Teacher Dashboard">
+                </div>
+            </div>
+        </div>
+
+        <div class="popular-sets-section">
+            <div class="section-header">
+                <h2>Popular flashcards sets</h2>
+                <div class="sets-nav">
+                    <button class="sets-nav-button prev" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span class="sets-page-indicator">Page <span>1</span> of 3</span>
+                    <button class="sets-nav-button next">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sets-grid-container">
+                <div class="sets-grid">
+                    <!-- Page 1 -->
+                    <div class="study-set-card">
+                        <div class="set-preview">
+                            <div class="preview-card">Term 1</div>
+                            <div class="preview-card back">Definition 1</div>
+                        </div>
+                        <div class="set-info">
+                            <div class="set-title">Biology Chapter 5: Cell Structure and Function</div>
+                            <div class="set-meta">
+                                <span class="terms-count">48 terms</span>
+                                <span class="subject-tag">Biology</span>
+                            </div>
+                            <div class="creator-info">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%234255FF'/%3E%3C/svg%3E" alt="Creator avatar">
+                                <span>Created by Sarah Johnson</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="study-set-card">
+                        <div class="set-preview">
+                            <div class="preview-card">Term 1</div>
+                            <div class="preview-card back">Definition 1</div>
+                        </div>
+                        <div class="set-info">
+                            <div class="set-title">Spanish Vocabulary: Common Phrases</div>
+                            <div class="set-meta">
+                                <span class="terms-count">92 terms</span>
+                                <span class="subject-tag">Spanish</span>
+                            </div>
+                            <div class="creator-info">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23FF725C'/%3E%3C/svg%3E" alt="Creator avatar">
+                                <span>Created by Miguel Torres</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="study-set-card">
+                        <div class="set-preview">
+                            <div class="preview-card">Term 1</div>
+                            <div class="preview-card back">Definition 1</div>
+                        </div>
+                        <div class="set-info">
+                            <div class="set-title">World History: Ancient Civilizations</div>
+                            <div class="set-meta">
+                                <span class="terms-count">75 terms</span>
+                                <span class="subject-tag">History</span>
+                            </div>
+                            <div class="creator-info">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%2300C985'/%3E%3C/svg%3E" alt="Creator avatar">
+                                <span>Created by Prof. Anderson</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+    </main>
+        
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>COMPANY</h3>
+                <ul>
+                    <li><a href="#">About Quizlet</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Press</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>SOLUTIONS</h3>
+                <ul>
+                    <li><a href="#">Quizlet Plus</a></li>
+                    <li><a href="#">Quizlet Live</a></li>
+                    <li><a href="#">Quizlet Learn</a></li>
+                    <li><a href="#">Explanations</a></li>
+                    <li><a href="#">Mobile Apps</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>FEATURES</h3>
+                <ul>
+                    <li><a href="#">Flashcards</a></li>
+                    <li><a href="#">Learn</a></li>
+                    <li><a href="#">Solutions</a></li>
+                    <li><a href="#">Quizlet Plus</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>HELP</h3>
+                <ul>
+                    <li><a href="#">Sign up</a></li>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Honor Code</a></li>
+                    <li><a href="#">Community Guidelines</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Terms</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>LANGUAGE</h3>
+                <select class="language-selector">
+                    <option value="en">English (USA)</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
+            </div>
+            <div class="copyright">
+                © 2025 Quizlet Inc.
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI Chat Icon and Interface -->
+    <div class="ai-chat-icon" id="aiChatIcon">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+
+    <div class="chat-interface" id="chatInterface">
+        <div class="chat-header">
+            <h3>AI Study Assistant</h3>
+            <button class="chat-close" id="chatClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai">Hi! I'm your AI study assistant. How can I help you today?</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" placeholder="Type your message..." id="chatInput">
+            <button id="sendMessage">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // AI Features Modal Functionality
+            const aiButton = document.getElementById('aiButton');
+            const aiModal = document.getElementById('aiModal');
+            const aiModalClose = document.getElementById('aiModalClose');
+            const suggestionChips = document.querySelectorAll('.suggestion-chip');
+            const diagramPreview = document.querySelector('.diagram-preview');
+
+            // Modal controls
+            function openModal() {
+                aiModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                aiModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            aiButton.addEventListener('click', openModal);
+            aiModalClose.addEventListener('click', closeModal);
+            
+            // Close modal when clicking outside
+            aiModal.addEventListener('click', (e) => {
+                if (e.target === aiModal) closeModal();
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && aiModal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+
+            // Smart suggestions interaction
+            suggestionChips.forEach(chip => {
+                chip.addEventListener('click', async () => {
+                    // Remove active class from all chips
+                    suggestionChips.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked chip
+                    chip.classList.add('active', 'generating');
+                    
+                    // Simulate AI processing
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    const recommendations = {
+                        'Flashcards': 'Generated 20 personalized flashcards based on your learning history',
+                        'Practice Tests': 'Created a custom practice test focusing on your weak areas',
+                        'Study Guides': 'Generated a comprehensive study guide with key concepts'
+                    };
+                    
+                    alert(`AI Assistant: ${recommendations[chip.textContent]}`);
+                    chip.classList.remove('generating');
+                });
+            });
+
+            // Progress Chart Generation
+            const viewDetailsBtn = document.querySelector('.ai-button');
+            viewDetailsBtn.addEventListener('click', () => {
+                diagramPreview.innerHTML = `
+                    <canvas id="progressChart" width="400" height="200"></canvas>
+                `;
+                generateProgressChart();
+            });
+
+            function generateProgressChart() {
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                const gradientFill = ctx.createLinearGradient(0, 0, 0, 200);
+                gradientFill.addColorStop(0, 'rgba(66, 85, 255, 0.2)');
+                gradientFill.addColorStop(1, 'rgba(66, 85, 255, 0)');
+
+                const data = {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Learning Progress',
+                        data: [65, 78, 82, 95],
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--quizlet-purple'),
+                        backgroundColor: gradientFill,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                };
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeInOutQuart'
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                                },
+                                ticks: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                                },
+                                ticks: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        hover: {
+                            mode: 'nearest',
+                            intersect: false
+                        }
+                    }
+                });
+            }
+
+            // Dark mode functionality
+            const darkModeToggle = document.querySelector('.dark-mode-toggle');
+            const moonIcon = darkModeToggle.querySelector('i');
+            
+            // Check for saved dark mode preference
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                moonIcon.classList.remove('fa-moon');
+                moonIcon.classList.add('fa-sun');
+            }
+
+            darkModeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                if (currentTheme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('darkMode', 'disabled');
+                    moonIcon.classList.remove('fa-sun');
+                    moonIcon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('darkMode', 'enabled');
+                    moonIcon.classList.remove('fa-moon');
+                    moonIcon.classList.add('fa-sun');
+                }
+            });
+
+            // Study cards slider
+            const container = document.querySelector('.cards-container');
+            const prevBtn = document.querySelector('.slider-button.prev');
+            const nextBtn = document.querySelector('.slider-button.next');
+            let currentPosition = 0;
+            const cardWidth = 334; // card width + gap
+            const maxPosition = -(cardWidth * (document.querySelectorAll('.study-card').length - 4));
+
+            // Popular sets slider
+            const setsGrid = document.querySelector('.sets-grid');
+            const setsPrevBtn = document.querySelector('.sets-nav-button.prev');
+            const setsNextBtn = document.querySelector('.sets-nav-button.next');
+            const pageIndicator = document.querySelector('.sets-page-indicator');
+            let currentPage = 1;
+            const totalPages = 3;
+            const cardsPerPage = 6;
+            const totalCards = 18;
+
+            function updateSetsPage(direction) {
+                if (direction === 'next' && currentPage < totalPages) {
+                    currentPage++;
+                } else if (direction === 'prev' && currentPage > 1) {
+                    currentPage--;
+                }
+
+                const translateX = -(currentPage - 1) * 100;
+                setsGrid.style.transform = `translateX(${translateX}%)`;
+                pageIndicator.children[0].textContent = currentPage;
+
+                setsPrevBtn.style.opacity = currentPage === 1 ? '0.5' : '1';
+                setsNextBtn.style.opacity = currentPage === totalPages ? '0.5' : '1';
+            }
+
+            setsPrevBtn.addEventListener('click', () => updateSetsPage('prev'));
+            setsNextBtn.addEventListener('click', () => updateSetsPage('next'));
+
+            // Initialize button states
+            setsPrevBtn.style.opacity = '0.5';
+            setsGrid.style.transition = 'transform 0.3s ease'
+
+            prevBtn.addEventListener('click', () => {
+                currentPosition = Math.min(currentPosition + cardWidth, 0);
+                container.style.transform = `translateX(${currentPosition}px)`;
+            });
+
+            nextBtn.addEventListener('click', () => {
+                currentPosition = Math.max(currentPosition - cardWidth, maxPosition);
+                container.style.transform = `translateX(${currentPosition}px)`;
+            });
+
+            // Mobile menu functionality
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const navLinks = document.querySelector('.nav-links');
+            const navDropdowns = document.querySelectorAll('.nav-dropdown');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+
+            navDropdowns.forEach(dropdown => {
+                dropdown.addEventListener('click', (e) => {
+                    // Only handle dropdown behavior in mobile view
+                    if (window.innerWidth <= 992) {
+                        e.preventDefault();
+                        dropdown.classList.toggle('active');
+                        
+                        // Close other dropdowns
+                        navDropdowns.forEach(other => {
+                            if (other !== dropdown && other.classList.contains('active')) {
+                                other.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.nav-links') && !e.target.closest('.mobile-menu-button')) {
+                    navLinks.classList.remove('active');
+                    navDropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 992) {
+                    navLinks.classList.remove('active');
+                    navDropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+                }
+            });
+
+            // AI Features functionality continues...
+            const diagramActions = document.querySelector('.diagram-actions');
+            diagramActions.querySelector('.ai-button').addEventListener('click', () => {
+                diagramPreview.innerHTML = `
+                    <canvas id="progressChart" width="400" height="200"></canvas>
+                `;
+                generateProgressChart();
+            });
+
+            function generateProgressChart() {
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                // Simulate progress data
+                const data = {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Study Progress',
+                        data: [65, 78, 82, 95],
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--quizlet-purple'),
+                        tension: 0.4,
+                        fill: false
+                    }]
+                };
+
+                // Create chart using data
+                new Chart(ctx, {
+                    type: 'line',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                                },
+                                ticks: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                                },
+                                ticks: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // AI Chat functionality
+            const aiChatIcon = document.getElementById('aiChatIcon');
+            const chatInterface = document.getElementById('chatInterface');
+            const chatClose = document.getElementById('chatClose');
+            const chatInput = document.getElementById('chatInput');
+            const sendMessage = document.getElementById('sendMessage');
+            const chatMessages = document.getElementById('chatMessages');
+
+            aiChatIcon.addEventListener('click', () => {
+                chatInterface.classList.toggle('active');
+            });
+
+            chatClose.addEventListener('click', () => {
+                chatInterface.classList.remove('active');
+            });
+
+            sendMessage.addEventListener('click', () => {
+                const userMessage = chatInput.value.trim();
+                if (userMessage) {
+                    // Add user message
+                    const userMessageElement = document.createElement('div');
+                    userMessageElement.className = 'message user';
+                    userMessageElement.textContent = userMessage;
+                    chatMessages.appendChild(userMessageElement);
+                    chatInput.value = '';
+                    scrollToBottom();
+
+                    // Simulate AI thinking
+                    const aiResponseElement = document.createElement('div');
+                    aiResponseElement.className = 'message ai';
+                    aiResponseElement.textContent = 'Thinking...';
+                    chatMessages.appendChild(aiResponseElement);
+                    scrollToBottom();
+
+                    // Simulate AI response after a delay
+                    setTimeout(() => {
+                        aiResponseElement.textContent = getAIResponse(userMessage);
+                        scrollToBottom();
+                    }, 1000);
+                }
+            });
+
+            // Enter key functionality for chat input
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage.click();
+                }
+            });
+
+            // Auto-scroll chat messages
+            const scrollToBottom = () => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+
+            // Simulate AI response
+            const getAIResponse = (message) => {
+                const responses = [
+                    "I can help you study that topic. Would you like flashcards or a practice test?",
+                    "Great question! Let me explain that concept...",
+                    "I've found some relevant study materials for you.",
+                    "Let me break that down into simpler terms..."
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            };
+        });
+    </script>
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- AI Modal -->
+    <div class="ai-modal" id="aiModal">
+        <div class="ai-modal-content">
+            <div class="ai-modal-header">
+                <h2 class="ai-modal-title">AI-Powered Learning</h2>
+                <button class="ai-modal-close" id="aiModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="ai-modal-body">
+                <!-- Smart Suggestions -->
+                <div class="ai-feature-card">
+                    <div class="ai-feature-header">
+                        <div class="ai-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="ai-content">
+                            <h3>Smart Suggestions</h3>
+                            <p>Get personalized study recommendations</p>
+                        </div>
+                    </div>
+                    <div class="ai-suggestions">
+                        <button class="suggestion-chip">Flashcards</button>
+                        <button class="suggestion-chip">Practice Tests</button>
+                        <button class="suggestion-chip">Study Guides</button>
+                    </div>
+                </div>
+
+                <!-- Progress Tracking -->
+                <div class="ai-feature-card">
+                    <div class="ai-feature-header">
+                        <div class="ai-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="ai-content">
+                            <h3>Progress Tracking</h3>
+                            <p>Visualize your learning journey</p>
+                        </div>
+                    </div>
+                    <div class="diagram-preview">
+                        <i class="fas fa-chart-bar fa-3x" style="color: var(--text-secondary);"></i>
+                    </div>
+                    <div class="diagram-actions">
+                        <button class="ai-button">View Details</button>
+                        <button class="ai-button secondary">Export Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
